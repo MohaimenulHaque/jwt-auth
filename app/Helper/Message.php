@@ -12,9 +12,24 @@ trait Message
             'data'    => $data,
         ], $status);
     }
+    public function unauthorized($message, $status = 401)
+    {
+        return response()->json([
+            'success' => false,
+            'message' => $message,
+        ], $status);
+    }
 
-    public function validatorError($validator, $status = 400){
-        // return $validator->errors()->first();
+    public function output( $data = [], $status = 200)
+    {
+        return response()->json([
+            'success' => true,
+            'data'    => $data,
+        ], $status);
+    }
+
+    public function validatorError($validator, $status = 400)
+    {
         return response()->json([
             'success' => false,
             'message' => $validator->errors()->first(),

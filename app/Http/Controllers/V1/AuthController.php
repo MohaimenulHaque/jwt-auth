@@ -28,11 +28,6 @@ class AuthController extends Controller
 
         if($validator->fails()){
             return $this->validatorError($validator);
-            // return response()->json([
-            //     'status' => 'false',
-            //     'message' => 'validation error',
-            //     'error' => $validator->errors()->all(),
-            // ]);
         }
 
         $user = new User();
@@ -42,14 +37,7 @@ class AuthController extends Controller
         $user->password     = $request->password;
         $user->save();
 
-        // return response()->json([
-        //         'status' => 'true',
-        //         'message' => 'Registration successfull',
-        //         'data' => $request->all()
-        //     ]);
-
         return $this->success('Registration successful',$request->all());
-
     }
 
 
@@ -58,11 +46,30 @@ class AuthController extends Controller
         $credentials = $request->only('email', 'password');
 
         if ($token = $this->guard()->attempt($credentials)) {
+            // return $this->success('Login successful',$this->respondWithToken($token));
             return $this->respondWithToken($token);
         }
 
+
         return response()->json(['error' => 'Unauthorized'], 401);
     }
+
+    public function logout()
+    {
+        $this->guard()->logout();
+        return response()->json(['message' => 'Successfully logged out']);
+    }
+
+
+    public function profile()
+    {
+        if (!$this->guard()->check()) {
+            return $this->unauthorized('Unauthorized');
+        }
+
+        return $this->output($this->guard()->user());
+    }
+    
 
 
     protected function respondWithToken($token)
