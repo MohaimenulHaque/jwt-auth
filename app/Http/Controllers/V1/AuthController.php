@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers\V1;
 
+use App\Helper\JWTToken;
 use App\Helper\Message;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+
 
 class AuthController extends Controller
 {
@@ -48,4 +51,37 @@ class AuthController extends Controller
         return $this->success('Registration successful',$request->all());
 
     }
+
+
+    public function login(Request $request)
+    {
+        $credentials = $request->only('email', 'password');
+
+        if ($token = $this->guard()->attempt($credentials)) {
+            return $this->respondWithToken($token);
+        }
+
+        return response()->json(['error' => 'Unauthorized'], 401);
+    }
+
+
+    protected function respondWithToken($token)
+    {
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => $this->guard()->factory()->getTTL() * 60
+        ]);
+    }
+
+    /**
+     * Get the guard to be used during authentication.
+     *
+     * @return \Illuminate\Contracts\Auth\Guard
+     */
+    public function guard()
+    {
+        return Auth::guard();
+    }
+
 }
